@@ -4,7 +4,7 @@
     {
         static void Main(string[] args)
         {
-            using(var regulator = new FanRegulator(new ClevoEcInfo()))
+            using(var regulator = new FanRegulator(new ClevoEcInfo(), new ConsoleLogger()))
             {
                 regulator.Exec();
             }

@@ -10,14 +10,17 @@ namespace BtoFanControl
             public const int NR_MEASUREMENTS_FOR_AVERAGE_TEMP = 12;
             public const int NR_MEASUREMENTS_FOR_CURRENT_TEMP = 3;
             public const int INITIAL_FAN_PERCENTAGE = 50;
+            public const int SLEEP_TIME_BETWEEN_MEASUREMENTS = 300;
         }
 
         private readonly IFanControl fan;
+        private readonly ILogger Log;
         private readonly Computer computer;
 
-        public FanRegulator(IFanControl fan)
+        public FanRegulator(IFanControl fan, ILogger log)
         {
             this.fan = fan;
+            this.Log = log;
             this.computer = new Computer();
         }
 
@@ -31,12 +34,11 @@ namespace BtoFanControl
         {
             int fanSpeedAdjustmentsCounter = 0;
             var temps = new RunningAvg(MagicConstants.NR_MEASUREMENTS_FOR_AVERAGE_TEMP);
-            int? currTemp;
             int fanPercentage = MagicConstants.INITIAL_FAN_PERCENTAGE;
             int prevFanPercentage = MagicConstants.INITIAL_FAN_PERCENTAGE;
-            Console.CursorVisible = false;
+            int? currTemp;
 
-            fan.SetFanSpeed(1, fanPercentage);
+            fan?.SetFanSpeed(1, fanPercentage);
 
             var CPU = GetCPU();
             while (true)
@@ -47,36 +49,34 @@ namespace BtoFanControl
                 {
                     temps.Add(currTemp.Value);
                     fanPercentage = CalcFanPercentage(fanPercentage, temps.GetAvg(MagicConstants.NR_MEASUREMENTS_FOR_CURRENT_TEMP), temps.GetAvg());
-                    Console.Write($" => Fan% is now {fanPercentage}%    ");
-                    Console.SetCursorPosition(0, 0);
 
                     if (fanPercentage != prevFanPercentage)
                     {
-                        Console.Write($"\nLast updated fan speed at {DateTime.Now.ToLongTimeString()}. {++fanSpeedAdjustmentsCounter} updates so far.                                   ");
-                        Console.SetCursorPosition(0, 0);
-                        fan.SetFanSpeed(1, fanPercentage);
+                        Log.Information($"\nLast updated fan speed at {DateTime.Now.ToLongTimeString()}. {++fanSpeedAdjustmentsCounter} updates so far.\n");
+                        fan?.SetFanSpeed(1, fanPercentage);
                         prevFanPercentage = fanPercentage;
                     }
                 }
-                System.Threading.Thread.Sleep(300);
+                System.Threading.Thread.Sleep(MagicConstants.SLEEP_TIME_BETWEEN_MEASUREMENTS);
             }
         }
 
-        private static int CalcFanPercentage(int currentFanPercentage, int currentTemp, int averageTemp)
+        private int CalcFanPercentage(int currentFanPercentage, int currentTemp, int averageTemp)
         {
-            int fanPercShouldBe;
+            int fanPercShouldBe, newFanPerc;
             if (currentTemp > 85 || averageTemp > 75) fanPercShouldBe = 70;
             else if (currentTemp > 67 || averageTemp > 58) fanPercShouldBe = 50;
             else if (currentTemp > 57 || averageTemp > 49) fanPercShouldBe = 30;
             else fanPercShouldBe = 22;
 
-            Console.Write($"Average = {averageTemp}°C, Current = {currentTemp}°C, Fan% should be {fanPercShouldBe}%");
+            if (fanPercShouldBe >= currentFanPercentage) newFanPerc = fanPercShouldBe;
+            else if (averageTemp < 46) newFanPerc = 22;
+            else if (averageTemp < 54) newFanPerc = 30;
+            else if (averageTemp < 68) newFanPerc = 50;
+            else newFanPerc = currentFanPercentage;
 
-            if (fanPercShouldBe >= currentFanPercentage) return fanPercShouldBe;
-            else if (averageTemp < 46) return 22;
-            else if (averageTemp < 54) return 30;
-            else if (averageTemp < 68) return 50;
-            return currentFanPercentage;
+            Log.Information($"Average = {averageTemp}°C, Current = {currentTemp}°C, Fan% should be {fanPercShouldBe}% => Fan% is now {newFanPerc}%");
+            return newFanPerc;
         }
 
         private IHardware GetCPU()

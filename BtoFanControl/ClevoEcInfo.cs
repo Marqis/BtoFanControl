@@ -22,25 +22,18 @@ namespace BtoFanControl
         {
             pDll = NativeMethods.LoadLibrary(@"ClevoEcInfo.dll");
             if (pDll == IntPtr.Zero) throw new Exception("Can't load ClevoEcInfo.dll");
-            try
-            {
 
-                pInitIo = NativeMethods.GetProcAddress(pDll, "InitIo");
-                pGetTempFanDuty = NativeMethods.GetProcAddress(pDll, "GetTempFanDuty");
-                pSetFanDuty = NativeMethods.GetProcAddress(pDll, "SetFanDuty");
-                if (pInitIo == IntPtr.Zero || pGetTempFanDuty == IntPtr.Zero || pSetFanDuty == IntPtr.Zero) throw new Exception("Can't find methods");
+            pInitIo = NativeMethods.GetProcAddress(pDll, "InitIo");
+            pGetTempFanDuty = NativeMethods.GetProcAddress(pDll, "GetTempFanDuty");
+            pSetFanDuty = NativeMethods.GetProcAddress(pDll, "SetFanDuty");
+            if (pInitIo == IntPtr.Zero || pGetTempFanDuty == IntPtr.Zero || pSetFanDuty == IntPtr.Zero) throw new Exception("Can't find methods");
 
 
-                initIo = (InitIo)Marshal.GetDelegateForFunctionPointer(pInitIo, typeof(InitIo));
-                getTempFanDuty = (GetTempFanDuty)Marshal.GetDelegateForFunctionPointer(pGetTempFanDuty, typeof(GetTempFanDuty));
-                setFanDuty = (SetFanDuty2)Marshal.GetDelegateForFunctionPointer(pSetFanDuty, typeof(SetFanDuty2));
+            initIo = (InitIo)Marshal.GetDelegateForFunctionPointer(pInitIo, typeof(InitIo));
+            getTempFanDuty = (GetTempFanDuty)Marshal.GetDelegateForFunctionPointer(pGetTempFanDuty, typeof(GetTempFanDuty));
+            setFanDuty = (SetFanDuty2)Marshal.GetDelegateForFunctionPointer(pSetFanDuty, typeof(SetFanDuty2));
 
-                bool theResult = initIo();
-            }
-            catch (Exception e)
-            {
-                Console.Write(e.ToString());
-            }
+            bool theResult = initIo();
         }
 
         public ECData2 GetECData(int fanNr)

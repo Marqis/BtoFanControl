@@ -50,8 +50,10 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ClevoEcInfo.cs" />
+    <Compile Include="ConsoleLogger.cs" />
     <Compile Include="FanRegulator.cs" />
     <Compile Include="IFanControl.cs" />
+    <Compile Include="ILogger.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

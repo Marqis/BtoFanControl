@@ -20,4 +20,4 @@ Last updated fan speed at 18:05:14. 6 updates so far.
 - There is no posibility for configuration whatsoever (unless you clone the repo and compile your own version).
 - It controls only one fan.
 - This project will not be maintained. Feel free to use it as is, or fork it an make your own version.
-- It uses "ClevoEcInfo.dll" to set the fan speed. This dll seems to have some stability issues. Before switching from "ClevoEcInfo.dll" to OpenHardwareMonitor for measuring the CPU temperature this resulted in the occasional "driver-power-state-failure". Is hasn't happened since, but it still might.
+- It uses "ClevoEcInfo.dll" to set the fan speed. This dll seems to have some stability issues. Before switching from "ClevoEcInfo.dll" to OpenHardwareMonitor for measuring the CPU temperature this resulted in the occasional "driver-power-state-failure". It hasn't happened since, but it still might.
